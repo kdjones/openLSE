@@ -60,3 +60,10 @@ PerformanceMetrics {
     Integer Int64 TotalTimeInTicks
 }
 
+
+
+category LSE
+NullOutput {
+    Other Boolean Value
+}
+
