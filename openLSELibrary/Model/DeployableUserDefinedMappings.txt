@@ -1,0 +1,58 @@
+﻿LSE Input Input {
+    Digitals: AllDigitals 
+    StatusWords: AllStatusWords 
+    VoltagePhasors: AllVoltagePhasors 
+    CurrentPhasors: AllCurrentPhasors 
+}
+
+ECA Digitals AllDigitals {
+    Values: { FILTER ActiveMeasurements WHERE SignalType='DIGI' } 
+}
+
+ECA StatusWords AllStatusWords {
+    Values: { FILTER ActiveMeasurements WHERE SignalType='FLAG' } 
+}
+
+ECA PhasorCollection AllVoltagePhasors {
+    Phasors: { FILTER Mappings WHERE TypeCategory='ECA' AND TypeIdentifier='Phasor' AND MappingIdentifier LIKE '%_V' } 
+}
+
+ECA PhasorCollection AllCurrentPhasors {
+    Phasors: { FILTER Mappings WHERE TypeCategory='ECA' AND TypeIdentifier='Phasor' AND MappingIdentifier LIKE '%_I' } 
+}
+
+LSE EstimatorOutput Output {
+    CircuitBreakerStatuses: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='DIGI' AND PointTag LIKE '%_CB:S' } 
+    TopologyProfilingData: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='DIGI' AND (PointTag LIKE '%TOPOLOGY_STATE%' OR PointTag LIKE '%TOPOLOGY_ID%') } 
+    MeasurementValidationFlags: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='DIGI' AND (PointTag LIKE '%_ND:VS%' OR PointTag LIKE '%_ND:FLOWS%') } 
+    VoltageMagnitudeEstimates: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='VPHM' AND PointTag LIKE '%:VME%' } 
+    VoltageAngleEstimates: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='VPHA' AND PointTag LIKE '%:VAE%' } 
+    VoltageMagnitudeResiduals: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='VPHM' AND PointTag LIKE '%:VMR%' } 
+    VoltageAngleResiduals: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='VPHA' AND PointTag LIKE '%:VAR%' } 
+    CurrentFlowMagnitudeEstimates: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='IPHM' AND PointTag LIKE '%:IME%' } 
+    CurrentFlowAngleEstimates: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='IPHA' AND PointTag LIKE '%:IAE%' } 
+    CurrentFlowMagnitudeResiduals: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='IPHM' AND PointTag LIKE '%:IMR%' } 
+    CurrentFlowAngleResiduals: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='IPHA' AND PointTag LIKE '%:IAR%' } 
+    PerformanceMetrics: PerformanceMetrics 
+}
+
+LSE PerformanceMetrics PerformanceMetrics {
+    ActiveVoltagesCount: 509de25b-ab66-4873-8ded-ba9b8b722fc1 
+    ActiveCurrentFlowsCount: 4b4533ee-187a-4329-9495-e174d059a64b 
+    ActiveCurrentInjectionsCount: 19a06df9-208b-427a-ba73-29a7966be978 
+    RefreshTime: 00586277-73e7-4e95-92b8-84d5dffc833d 
+    ParsingTime: 79f56175-f136-4dc5-b464-ed0f717a1a42 
+    MeasurementMappingTime: 3bb811ac-4198-4418-b6f5-f7984054b731 
+    ActiveCurrentDeterminationTime: b490b235-7686-43c4-babb-84d9e9339572 
+    ObservabilityAnalysisTime: ecd6f617-6ab6-458f-9d5e-eed71185d110 
+    StateComputationTime: 688a7dd5-2de8-45c6-a3b3-e872a8eeef8b 
+    ObservedBusCount: cc4ac9e2-fc84-4dec-bd61-7e1eaafbb9a2 
+    OutputPreparationTime: f771f2c7-163e-4ee5-ad30-051979730cc4 
+    TotalTimeInMilliseconds: 69f51c35-1d3b-4754-b96a-8a5b6b169f3c 
+    TotalTimeInTicks: 058b0e94-dd24-4b9b-a8de-614ca69c4668 
+}
+
+LSE NullOutput NullOutput {
+    Value: LSE_NullOutput:Value 
+}
+

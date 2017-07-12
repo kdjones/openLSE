@@ -175,7 +175,7 @@
     <ComponentGroup Id="ModelComponents" Directory="MODELFOLDER">
       <!-- Model Types and Mappings -->
       <Component Id="UserDefinedMappings">
-        <File Id="UserDefinedMappings.ecamap" Name="UserDefinedMappings.ecamap" Source="$(var.openLSELibrary.ProjectDir)Model\UserDefinedMappings.ecamap" />
+        <File Id="UserDefinedMappings.ecamap" Name="UserDefinedMappings.ecamap" Source="$(var.openLSELibrary.ProjectDir)Model\DeployableUserDefinedMappings.txt" />
       </Component>
       <Component Id="UserDefinedTypes">
         <File Id="UserDefinedTypes.ecaidl" Name="UserDefinedTypes.ecaidl" Source="$(var.openLSELibrary.ProjectDir)Model\UserDefinedTypes.ecaidl" />

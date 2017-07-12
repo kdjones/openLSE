@@ -52,6 +52,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Model\DeployableUserDefinedMappings.txt" />
     <Content Include="Model\suggested-filter-expression-mappings.txt" />
     <Content Include="openLSELibrary.ico" />
   </ItemGroup>
