@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  <!-- Following Manufacturer value becomes company name for default installation folder, e.g., C:\Program Files\Grid Protection Alliance\openLSEService\ -->
+  <Product Id="*" Name="openLSE" Manufacturer="Grid Protection Alliance" Language="1033" Version="!(bind.FileVersion.openLSEService.exe)" UpgradeCode="2e9ed2dc-09a3-4fbe-83f5-9e9a629635c1">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <PropertyRef Id="WIX_IS_NETFRAMEWORK_46_OR_LATER_INSTALLED"/>
+    <Condition Message='This setup requires Microsoft .NET Framework 4.6 or greater - this will need to be installed before installation can continue.'>
+      <![CDATA[Installed OR WIX_IS_NETFRAMEWORK_46_OR_LATER_INSTALLED]]>
+    </Condition>
+
+    <Feature Id="ProductFeature" Title="[ProductName]" Level="1" ConfigurableDirectory="INSTALLFOLDER">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentGroupRef Id="ModelComponents" />
+    </Feature>
+
+    <!-- User Interface -->
+    <UIRef Id="WixUI_InstallDir" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+
+    <Icon Id="openLSEService.ico.exe" SourceFile="$(var.openLSEService.TargetPath)" />
+    <Icon Id="openLSEServiceConsole.ico.exe" SourceFile="$(var.openLSEServiceConsole.TargetPath)" />
+    <Icon Id="ConfigurationEditor.ico.exe" SourceFile="$(var.ProjectDir)\ConfigurationEditor.exe" />
+    <Icon Id="ConfigCrypter.ico.exe" SourceFile="$(var.ProjectDir)\ConfigCrypter.exe" />
+    <Icon Id="LogFileViewer.ico.exe" SourceFile="$(var.ProjectDir)\LogFileViewer.exe" />
+    <Icon Id="NetworkModelEditor.ico.exe" SourceFile="$(var.SolutionDir)\Dependencies\LSE\NetworkModelEditor.exe"/>
+
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.ProjectDir)\openLSESetupBanner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.ProjectDir)\openLSESetupDialog.bmp" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.ProjectDir)\INSTALL_LICENSE.rtf" />
+
+    <!-- Add/Remove Programs Icon -->
+    <Property Id="ARPPRODUCTICON" Value="openLSEService.ico.exe" />
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="ManufacturerFolder" Name="!(bind.property.Manufacturer)">
+          <Directory Id="INSTALLFOLDER" Name="openLSE">
+            <Directory Id="MODELFOLDER" Name="Model" />
+          </Directory>
+        </Directory>
+      </Directory>
+
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="openLSE" />
+      </Directory>
+    </Directory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <!-- Service Applications -->
+      <Component Id="openLSEService">
+        <File Id="openLSEService.exe" Name="$(var.openLSEService.TargetFileName)" Source="$(var.openLSEService.TargetPath)" />
+        <ServiceInstall Id="openLSEService" Name="openLSE" Type="ownProcess" Start="auto" ErrorControl="normal" Description="Service host for openECA analytic: openLSE." />
+        <ServiceControl Id="openLSEServiceControl" Name="openLSE" Start="install" Stop="both" Remove="uninstall" />
+      </Component>
+      <Component Id="openLSEServiceConfig">
+        <File Id="openLSEService.exe.config" Name="$(var.openLSEService.TargetFileName).config" Source="$(var.openLSEService.TargetPath).config" />
+      </Component>
+      <Component Id="openLSEServiceConsole">
+        <File Id="openLSEServiceConsole.exe" Name="$(var.openLSEServiceConsole.TargetFileName)" Source="$(var.openLSEServiceConsole.TargetPath)" />
+        <Shortcut Id="openLSEServiceConsoleStartMenuShortcut" Name="openLSE Console" Icon="openLSEServiceConsole.ico.exe" Description="Console application to monitor the openLSE service." WorkingDirectory="INSTALLFOLDER" Directory="ApplicationProgramsFolder" Advertise="yes" />
+      </Component>
+      <Component Id="openLSEServiceConsoleConfig">
+        <File Id="openLSEServiceConsole.exe.config" Name="$(var.openLSEServiceConsole.TargetFileName).config" Source="$(var.openLSEServiceConsole.TargetPath).config" />
+      </Component>
+
+      <!-- Primary Algorithm Library -->
+      <Component Id="openLSELibrary">
+        <File Id="openLSELibrary.dll" Name="$(var.openLSELibrary.TargetFileName)" Source="$(var.openLSELibrary.TargetPath)" />
+      </Component>
+
+      <!-- LSE Dependencies -->
+      <Component Id="SynchrophasorAnalytics">
+        <File Id="SynchrophasorAnalytics.dll" Name="SynchrophasorAnalytics.dll" Source="$(var.SolutionDir)\Dependencies\LSE\SynchrophasorAnalytics.dll" />
+      </Component>
+      <Component Id="SynchrophasorAnalyticsConfig">
+        <File Id="SynchrophasorAnalytics.dll.config" Name="SynchrophasorAnalytics.dll.config" Source="$(var.SolutionDir)\Dependencies\LSE\SynchrophasorAnalytics.dll.config" />
+      </Component>
+      <Component Id="MathNet.Numerics.Data.Matlab">
+        <File Id="MathNet.Numerics.Data.Matlab.dll" Name="MathNet.Numerics.Data.Matlab.dll" Source="$(var.SolutionDir)\Dependencies\LSE\MathNet.Numerics.Data.Matlab.dll" />
+      </Component>
+      <Component Id="MathNet.Numerics">
+        <File Id="MathNet.Numerics.dll" Name="MathNet.Numerics.dll" Source="$(var.SolutionDir)\Dependencies\LSE\MathNet.Numerics.dll" />
+      </Component>
+
+      <!-- Network Model Editor Dependencies -->
+      <Component Id="NetworkModelEditor">
+        <File Id="NetworkModelEditor.exe" Name="NetworkModelEditor.exe" Source="$(var.SolutionDir)\Dependencies\LSE\NetworkModelEditor.exe" />
+        <Shortcut Id="NetworkModelEditorStartMenuShortcut" Name="Network Model Editor" Icon="NetworkModelEditor.ico.exe" Description="Tool used edit the XML network model file for the [ProductName]." WorkingDirectory="INSTALLFOLDER" Directory="ApplicationProgramsFolder" Advertise="yes" />
+      </Component>
+      <Component Id="NetworkModelEditorConfig">
+        <File Id="NetworkModelEditor.exe.config" Name="NetworkModelEditor.exe.config" Source="$(var.SolutionDir)\Dependencies\LSE\NetworkModelEditor.exe.config" />
+      </Component>
+      <Component Id="MeasurementSampler">
+        <File Id="MeasurementSampler.dll" Name="MeasurementSampler.dll" Source="$(var.SolutionDir)\Dependencies\LSE\MeasurementSampler.dll" />
+      </Component>
+
+      <!-- Config Crypter -->
+      <Component Id="ConfigCrypter">
+        <File Id="ConfigCrypter.exe" Name="ConfigCrypter.exe" Source="$(var.ProjectDir)\ConfigCrypter.exe" />
+        <Shortcut Id="ConfigurationCrypterStartMenuShortcut" Name="Cipher Key Manager" Icon="ConfigCrypter.ico.exe" Description="Tool used to manage cryptographic cipher keys." WorkingDirectory="INSTALLFOLDER" Directory="ApplicationProgramsFolder" Advertise="yes" />
+      </Component>
+      <Component Id="ConfigCrypterConfig">
+        <File Id="ConfigCrypter.exe.config" Name="ConfigCrypter.exe.config" Source="$(var.ProjectDir)\ConfigCrypter.exe.config" />
+      </Component>
+
+      <!-- Configuration Editor -->
+      <Component Id="ConfigurationEditor">
+        <File Id="ConfigurationEditor.exe" Name="ConfigurationEditor.exe" Source="$(var.ProjectDir)\ConfigurationEditor.exe" />
+        <Shortcut Id="ConfigurationEditorStartMenuShortcut" Name="XML Configuration Editor" Icon="ConfigurationEditor.ico.exe" Description="Tool used edit the XML configuration file for the [ProductName] service and its components." WorkingDirectory="INSTALLFOLDER" Directory="ApplicationProgramsFolder" Advertise="yes" />
+      </Component>
+      <Component Id="ConfigurationEditorConfig">
+        <File Id="ConfigurationEditor.exe.config" Name="ConfigurationEditor.exe.config" Source="$(var.ProjectDir)\ConfigurationEditor.exe.config" />
+      </Component>
+      
+      <!-- Log File Viewer -->
+      <Component Id="LogFileViewer">
+        <File Id="LogFileViewer.exe" Name="LogFileViewer.exe" Source="$(var.ProjectDir)\LogFileViewer.exe" />
+        <Shortcut Id="LogFileViewerStartMenuShortcut" Name="Log File Viewer" Icon="LogFileViewer.ico.exe" Description="Tool used to analyze log files produced by the openLSEService." WorkingDirectory="INSTALLFOLDER" Directory="ApplicationProgramsFolder" Advertise="yes" />
+      </Component>
+
+      <!-- GSF Dependencies -->
+      <Component Id="GSF.Core">
+        <File Id="GSF.Core.dll" Name="GSF.Core.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.Core.dll" />
+      </Component>
+      <Component Id="GSF.Communication">
+        <File Id="GSF.Communication.dll" Name="GSF.Communication.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.Communication.dll" />
+      </Component>
+      <Component Id="GSF.Security">
+        <File Id="GSF.Security.dll" Name="GSF.Security.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.Security.dll" />
+      </Component>
+      <Component Id="GSF.ServiceProcess">
+        <File Id="GSF.ServiceProcess.dll" Name="GSF.ServiceProcess.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.ServiceProcess.dll" />
+      </Component>
+      <Component Id="GSF.TimeSeries">
+        <File Id="GSF.TimeSeries.dll" Name="GSF.TimeSeries.dll" Source="$(var.SolutionDir)\Dependencies\GSF\GSF.TimeSeries.dll" />
+      </Component>
+      <Component Id="Antlr3.Runtime">
+        <File Id="Antlr3.Runtime.dll" Name="Antlr3.Runtime.dll" Source="$(var.SolutionDir)\Dependencies\GSF\Antlr3.Runtime.dll" />
+      </Component>
+      <Component Id="ExpressionEvaluator">
+        <File Id="ExpressionEvaluator.dll" Name="ExpressionEvaluator.dll" Source="$(var.SolutionDir)\Dependencies\GSF\ExpressionEvaluator.dll" />
+      </Component>
+
+      <!-- ECA Dependencies -->
+      <Component Id="ECAClientFramework">
+        <File Id="ECAClientFramework.dll" Name="ECAClientFramework.dll" Source="$(var.SolutionDir)\Dependencies\openECA\ECAClientFramework.dll" />
+      </Component>
+      <Component Id="ECAClientUtilities">
+        <File Id="ECAClientUtilities.dll" Name="ECAClientUtilities.dll" Source="$(var.SolutionDir)\Dependencies\openECA\ECAClientUtilities.dll" />
+      </Component>
+      <Component Id="ECACommonUtilities">
+        <File Id="ECACommonUtilities.dll" Name="ECACommonUtilities.dll" Source="$(var.SolutionDir)\Dependencies\openECA\ECACommonUtilities.dll" />
+      </Component>
+
+      <!-- Other Dependencies -->
+
+      <!-- Cleanup -->
+      <Component Id="Cleanup" Guid="{0b8fe04c-bc83-4b98-9aa1-89a3e360a85f}">
+        <CreateFolder />
+        <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+        <RemoveFolder Id="RemoveModelFolder" Directory="MODELFOLDER" On="uninstall" />
+        <RemoveFolder Id="RemoveInstallFolder" Directory="INSTALLFOLDER" On="uninstall" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="ModelComponents" Directory="MODELFOLDER">
+      <!-- Model Types and Mappings -->
+      <Component Id="UserDefinedMappings">
+        <File Id="UserDefinedMappings.ecamap" Name="UserDefinedMappings.ecamap" Source="$(var.openLSELibrary.ProjectDir)Model\UserDefinedMappings.ecamap" />
+      </Component>
+      <Component Id="UserDefinedTypes">
+        <File Id="UserDefinedTypes.ecaidl" Name="UserDefinedTypes.ecaidl" Source="$(var.openLSELibrary.ProjectDir)Model\UserDefinedTypes.ecaidl" />
+      </Component>
+      <Component Id="LseUserDefinedTypes">
+        <File Id="LseUserDefinedTypes.ecaidl" Name="LseUserDefinedTypes.ecaidl" Source="$(var.openLSELibrary.ProjectDir)Model\LseUserDefinedTypes.ecaidl" />
+      </Component>
+      <Component Id="SuggestedFilterExpressionMappings">
+        <File Id="SuggestedFilterExpressionMappings" Name="suggested-filter-expression-mappings.txt" Source="$(var.openLSELibrary.ProjectDir)Model\suggested-filter-expression-mappings.txt" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

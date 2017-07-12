@@ -1,0 +1,62 @@
+category LSE
+Input {
+    ECA Digitals Digitals
+    ECA StatusWords StatusWords
+    ECA PhasorCollection VoltagePhasors
+    ECA PhasorCollection CurrentPhasors
+}
+
+category ECA
+Digitals {
+    FloatingPoint Double[] Values
+}
+
+category ECA
+StatusWords {
+    FloatingPoint Double[] Values
+}
+
+category ECA
+PhasorCollection {
+    ECA Phasor[] Phasors
+}
+
+category ECA
+Phasor {
+    FloatingPoint Double Magnitude
+    FloatingPoint Double Angle
+}
+
+category LSE
+EstimatorOutput {
+    FloatingPoint Double[] CircuitBreakerStatuses
+    FloatingPoint Double[] TopologyProfilingData
+    FloatingPoint Double[] MeasurementValidationFlags
+    FloatingPoint Double[] VoltageMagnitudeEstimates
+    FloatingPoint Double[] VoltageAngleEstimates
+    FloatingPoint Double[] VoltageMagnitudeResiduals
+    FloatingPoint Double[] VoltageAngleResiduals
+    FloatingPoint Double[] CurrentFlowMagnitudeEstimates
+    FloatingPoint Double[] CurrentFlowAngleEstimates
+    FloatingPoint Double[] CurrentFlowMagnitudeResiduals
+    FloatingPoint Double[] CurrentFlowAngleResiduals
+    LSE PerformanceMetrics PerformanceMetrics
+}
+
+category LSE
+PerformanceMetrics {
+    Integer Int32 ActiveVoltagesCount
+    Integer Int32 ActiveCurrentFlowsCount
+    Integer Int32 ActiveCurrentInjectionsCount
+    FloatingPoint Double RefreshTime
+    FloatingPoint Double ParsingTime
+    FloatingPoint Double MeasurementMappingTime
+    FloatingPoint Double ActiveCurrentDeterminationTime
+    FloatingPoint Double ObservabilityAnalysisTime
+    FloatingPoint Double StateComputationTime
+    Integer Int32 ObservedBusCount
+    FloatingPoint Double OutputPreparationTime
+    FloatingPoint Double TotalTimeInMilliseconds
+    Integer Int64 TotalTimeInTicks
+}
+

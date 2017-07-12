@@ -1,0 +1,37 @@
+﻿LSE Input Input {
+    Digitals: AllDigitals 
+    StatusWords: AllStatusWords 
+    VoltagePhasors: AllVoltagePhasors 
+    CurrentPhasors: AllCurrentPhasors 
+}
+
+ECA Digitals AllDigitals {
+    Values: { FILTER ActiveMeasurements WHERE SignalType='DIGI' } 
+}
+
+ECA StatusWords AllStatusWords {
+    Values: { FILTER ActiveMeasurements WHERE SignalType='FLAG' } 
+}
+
+ECA PhasorCollection AllVoltagePhasors {
+    Phasors: { FILTER Mappings WHERE TypeCategory='ECA' AND TypeIdentifier='Phasor' AND MappingIdentifier LIKE '%_V' } 
+}
+
+ECA PhasorCollection AllCurrentPhasors {
+    Phasors: { FILTER Mappings WHERE TypeCategory='ECA' AND TypeIdentifier='Phasor' AND MappingIdentifier LIKE '%_I' } 
+}
+
+LSE EstimatorOutput Output {
+    CircuitBreakerStatuses: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='DIGI' AND PointTag LIKE '%_CB:S' } 
+    TopologyProfilingData: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='DIGI' AND (PointTag LIKE '%TOPOLOGY_STATE%' OR PointTag LIKE '%TOPOLOGY_ID%') } 
+    MeasurementValidationFlags: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='DIGI' AND (PointTag LIKE '%_ND:VS%' OR PointTag LIKE '%_ND:FLOWS%') } 
+    VoltageMagnitudeEstimates: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='VPHM' AND PointTag LIKE '%:VME%' } 
+    VoltageAngleEstimates: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='VPHA' AND PointTag LIKE '%:VAE%' } 
+    VoltageMagnitudeResiduals: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='VPHM' AND PointTag LIKE '%:VMR%' } 
+    VoltageAngleResiduals: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='VPHA' AND PointTag LIKE '%:VAR%' } 
+    CurrentFlowMagnitudeEstimates: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='IPHM' AND PointTag LIKE '%:IME%' } 
+    CurrentFlowAngleEstimates: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='IPHA' AND PointTag LIKE '%:IAE%' } 
+    CurrentFlowMagnitudeResiduals: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='IPHM' AND PointTag LIKE '%:IMR%' } 
+    CurrentFlowAngleResiduals: { FILTER ActiveMeasurements WHERE Device LIKE 'LSE!%' AND SignalType='IPHA' AND PointTag LIKE '%:IAR%' } 
+    PerformanceMetrics: PerformanceMetrics 
+}
