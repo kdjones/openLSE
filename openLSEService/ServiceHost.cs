@@ -119,7 +119,7 @@ namespace openLSEService
 
             string servicePath = FilePath.GetAbsolutePath("");
             string defaultLogPath = string.Format("{0}{1}Logs{1}", servicePath, Path.DirectorySeparatorChar);
-            string defaultNetworkModelPath = string.Format("{0}{1}/NetworkModel.xml", servicePath, Path.DirectorySeparatorChar);
+            //string defaultNetworkModelPath = string.Format("{0}{1}/NetworkModel.xml", servicePath, Path.DirectorySeparatorChar);
 
             // Initialize algorithm processing framework - this will define default system settings
             try
@@ -145,7 +145,7 @@ namespace openLSEService
             systemSettings.Add("FramesPerSecond", SystemSettings.FramesPerSecond, "Data rate, in frames per second, expected by algorithm.");
             systemSettings.Add("LagTime", SystemSettings.LagTime, "Maximum past-time deviation tolerance, in seconds (can be sub-second), that the algorithm will tolerate.");
             systemSettings.Add("LeadTime", SystemSettings.LeadTime, "Maximum future-time deviation tolerance, in seconds (can be sub-second), that the algorithm will tolerate.");
-            systemSettings.Add("NetworkModelAbsolutePath", defaultNetworkModelPath, "The full path, including the file name, of the LSE network model XML file.");
+            systemSettings.Add("NetworkModelAbsolutePath", "NetworkModel.xml", "The full path, including the file name, of the LSE network model XML file.");
             systemSettings.Add("PhaseConfiguration", "PositiveSequence", "Either 'PositiveSequence' or 'ThreePhase'");
             systemSettings.Add("OverridePhaseConfiguration", true, "A flag that specifies whether to use the phase configuration in the model or in the system settings.");
 
