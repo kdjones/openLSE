@@ -229,7 +229,7 @@ namespace openLSE
         {
             // Add the measurements to the model here
             // m_network.Model.InputKeyValuePairs.Add(angleKey, phasor.Angle);
-            for (int i = 0; i < inputMeta.VoltagePhasors.Phasors.Length; i++)
+            for (int i = 0; i < inputMeta.CurrentPhasors.Phasors.Length; i++)
             {
                 Guid magnitudeKey = inputMeta.CurrentPhasors.Phasors[i].Magnitude.ID;
                 Guid angleKey = inputMeta.CurrentPhasors.Phasors[i].Angle.ID;
@@ -328,7 +328,7 @@ namespace openLSE
             m_network.Model.InputKeyValuePairs.Clear();
             m_network.Model.ClearValues();
             m_stopwatch.Stop();
-            m_network.PerformanceMetrics.RefreshExecutionTime = m_stopwatch.ElapsedMilliseconds;
+            m_network.PerformanceMetrics.RefreshExecutionTime = m_stopwatch.ElapsedTicks;
         }
 
         private static void MapInput(Input inputData, _InputMeta inputMeta)
@@ -340,7 +340,7 @@ namespace openLSE
             MapStatusWordInput(inputData, inputMeta);
             MapDigitalsInput(inputData, inputMeta);
             m_stopwatch.Stop();
-            m_network.PerformanceMetrics.ParsingExecutionTime = m_stopwatch.ElapsedMilliseconds;
+            m_network.PerformanceMetrics.ParsingExecutionTime = m_stopwatch.ElapsedTicks;
         }
 
         /// <summary>
@@ -352,7 +352,7 @@ namespace openLSE
             m_stopwatch.Start();
             m_network.Model.OnNewMeasurements();
             m_stopwatch.Stop();
-            m_network.PerformanceMetrics.MeasurementMappingExecutionTime = m_stopwatch.ElapsedMilliseconds;
+            m_network.PerformanceMetrics.MeasurementMappingExecutionTime = m_stopwatch.ElapsedTicks;
         }
 
         /// <summary>
@@ -363,25 +363,24 @@ namespace openLSE
             m_stopwatch.Reset();
             m_stopwatch.Start();
             m_network.RunNetworkReconstructionCheck();
-            if (m_network.HasChangedSincePreviousFrame)
+            if (m_network.HasChangedSincePreviousFrame || m_network.Model.ObservedBuses.Count == 0)
             {
                 m_network.Model.DetermineActiveCurrentFlows();
                 m_network.Model.DetermineActiveCurrentInjections();
             }
             m_stopwatch.Stop();
-            m_network.PerformanceMetrics.ActiveCurrentPhasorDeterminationExecutionTime = m_stopwatch.ElapsedMilliseconds;
+            m_network.PerformanceMetrics.ActiveCurrentPhasorDeterminationExecutionTime = m_stopwatch.ElapsedTicks;
             
             m_stopwatch.Reset();
             m_stopwatch.Start();
-            m_network.RunNetworkReconstructionCheck();
-            if (m_network.HasChangedSincePreviousFrame)
+            if (m_network.HasChangedSincePreviousFrame || m_network.Model.ObservedBuses.Count == 0)
             {
                 m_network.Model.ResolveToObservedBuses();
                 m_network.Model.ResolveToSingleFlowBranches();
 
             }
             m_stopwatch.Stop();
-            m_network.PerformanceMetrics.ObservabilityAnalysisExecutionTime = m_stopwatch.ElapsedMilliseconds;
+            m_network.PerformanceMetrics.ObservabilityAnalysisExecutionTime = m_stopwatch.ElapsedTicks;
 
         }
 
@@ -394,7 +393,7 @@ namespace openLSE
             m_stopwatch.Start();
             m_network.ComputeSystemState();
             m_stopwatch.Stop();
-            m_network.PerformanceMetrics.StateComputationExecutionTime = m_stopwatch.ElapsedMilliseconds;
+            m_network.PerformanceMetrics.StateComputationExecutionTime = m_stopwatch.ElapsedTicks;
 
         }
 
@@ -417,9 +416,9 @@ namespace openLSE
             MapMeasurementValidationFlagOutput(output);
             m_stopwatch.Stop();
             m_totalTimeStopwatch.Stop();
-            m_network.PerformanceMetrics.TotalExecutionTimeInMilliseconds = m_totalTimeStopwatch.ElapsedMilliseconds;
             m_network.PerformanceMetrics.TotalExecutionTimeInTicks = m_totalTimeStopwatch.ElapsedTicks;
-            m_network.PerformanceMetrics.SolutionRetrievalExecutionTime = m_stopwatch.ElapsedMilliseconds;
+            m_network.PerformanceMetrics.TotalExecutionTimeInMilliseconds = m_totalTimeStopwatch.ElapsedMilliseconds;
+            m_network.PerformanceMetrics.SolutionRetrievalExecutionTime = m_stopwatch.ElapsedTicks;
             MapPerformanceMetrics(output);
         }
 
