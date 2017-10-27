@@ -20,6 +20,7 @@ namespace openLSE.Model
 
         // Fields
         private readonly Unmapper m_unmapper;
+        private openLSE.Model.LSE._InputMeta m_inputMeta;
 
         #endregion
 
@@ -185,7 +186,7 @@ namespace openLSE.Model
                 for (int i = 0; i < count; i++)
                 {
                     IMeasurement measurement = GetArrayMeasurement(i);
-                    list.Add(GetMetaValues(measurement));
+                    list.Add(GetMetaValuesWithNormalFlag(measurement));
                 }
 
                 obj.Values = list.ToArray();
@@ -233,7 +234,7 @@ namespace openLSE.Model
                 for (int i = 0; i < count; i++)
                 {
                     IMeasurement measurement = GetArrayMeasurement(i);
-                    list.Add(GetMetaValues(measurement));
+                    list.Add(GetMetaValuesWithNormalFlag(measurement));
                 }
 
                 obj.Values = list.ToArray();
@@ -325,17 +326,27 @@ namespace openLSE.Model
                 // Assign MetaValues value to "Magnitude" field
                 FieldMapping fieldMapping = fieldLookup["Magnitude"];
                 IMeasurement measurement = GetMeasurement(fieldMapping);
-                obj.Magnitude = GetMetaValues(measurement);
+                obj.Magnitude = GetMetaValuesWithNormalFlag(measurement);
             }
 
             {
                 // Assign MetaValues value to "Angle" field
                 FieldMapping fieldMapping = fieldLookup["Angle"];
                 IMeasurement measurement = GetMeasurement(fieldMapping);
-                obj.Angle = GetMetaValues(measurement);
+                obj.Angle = GetMetaValuesWithNormalFlag(measurement);
             }
 
             return obj;
+        }
+
+        private MetaValues GetMetaValuesWithNormalFlag(IMeasurement measurement)
+        {
+            return new MetaValues()
+            {
+                ID = measurement.ID,
+                Timestamp = measurement.Timestamp,
+                Flags = MeasurementFlags.Normal
+            };
         }
 
         #endregion

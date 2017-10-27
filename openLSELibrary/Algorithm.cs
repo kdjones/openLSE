@@ -105,6 +105,30 @@ namespace openLSE
             }
         }
 
+        public static Stopwatch PerformanceTimer
+        {
+            get
+            {
+                if (m_stopwatch == null)
+                {
+                    m_stopwatch = new Stopwatch();
+                }
+                return m_stopwatch;
+            }
+        }
+
+        public static Stopwatch RuntimeTimer
+        {
+            get
+            {
+                if (m_totalTimeStopwatch == null)
+                {
+                    m_totalTimeStopwatch = new Stopwatch();
+                }
+                return m_totalTimeStopwatch;
+            }
+        }
+        
         #endregion
 
         #region [ Constructor ]
@@ -113,8 +137,6 @@ namespace openLSE
         {
             RefreshModel();
             m_frameIndex = 0;
-            m_stopwatch = new Stopwatch();
-            m_totalTimeStopwatch = new Stopwatch();
         }
 
         #endregion
@@ -155,6 +177,9 @@ namespace openLSE
 
         internal static Output Execute(Input inputData, _InputMeta inputMeta)
         {
+            RuntimeTimer.Reset();
+            RuntimeTimer.Start();
+
             Output output = Output.CreateNew();
             m_frameIndex += 1;
 
@@ -167,8 +192,6 @@ namespace openLSE
                 else
                 {
 
-                    m_totalTimeStopwatch.Reset();
-                    m_totalTimeStopwatch.Start();
                     ClearMeasurements();
                     MapInput(inputData, inputMeta);
                     AcknowledgeMeasurements();
@@ -322,25 +345,19 @@ namespace openLSE
         /// </summary>
         private static void ClearMeasurements()
         {
-            // Clear the measurements from the model in preparation
-            m_stopwatch.Reset();
-            m_stopwatch.Start();
-            m_network.Model.InputKeyValuePairs.Clear();
             m_network.Model.ClearValues();
-            m_stopwatch.Stop();
-            m_network.PerformanceMetrics.RefreshExecutionTime = m_stopwatch.ElapsedTicks;
         }
 
         private static void MapInput(Input inputData, _InputMeta inputMeta)
         {
-            m_stopwatch.Reset();
-            m_stopwatch.Start();
+            PerformanceTimer.Reset();
+            PerformanceTimer.Start();
             MapVoltagePhasorInput(inputData, inputMeta);
             MapCurrentPhasorInput(inputData, inputMeta);
             MapStatusWordInput(inputData, inputMeta);
             MapDigitalsInput(inputData, inputMeta);
-            m_stopwatch.Stop();
-            m_network.PerformanceMetrics.ParsingExecutionTime = m_stopwatch.ElapsedTicks;
+            PerformanceTimer.Stop();
+            m_network.PerformanceMetrics.ParsingExecutionTime = PerformanceTimer.ElapsedTicks;
         }
 
         /// <summary>
@@ -348,11 +365,7 @@ namespace openLSE
         /// </summary>
         private static void AcknowledgeMeasurements()
         {
-            m_stopwatch.Reset();
-            m_stopwatch.Start();
             m_network.Model.OnNewMeasurements();
-            m_stopwatch.Stop();
-            m_network.PerformanceMetrics.MeasurementMappingExecutionTime = m_stopwatch.ElapsedTicks;
         }
 
         /// <summary>
@@ -360,28 +373,19 @@ namespace openLSE
         /// </summary>
         private static void ExecuteObservabilityAnalysis()
         {
-            m_stopwatch.Reset();
-            m_stopwatch.Start();
             m_network.RunNetworkReconstructionCheck();
             if (m_network.HasChangedSincePreviousFrame || m_network.Model.ObservedBuses.Count == 0)
             {
                 m_network.Model.DetermineActiveCurrentFlows();
                 m_network.Model.DetermineActiveCurrentInjections();
             }
-            m_stopwatch.Stop();
-            m_network.PerformanceMetrics.ActiveCurrentPhasorDeterminationExecutionTime = m_stopwatch.ElapsedTicks;
-            
-            m_stopwatch.Reset();
-            m_stopwatch.Start();
+
             if (m_network.HasChangedSincePreviousFrame || m_network.Model.ObservedBuses.Count == 0)
             {
                 m_network.Model.ResolveToObservedBuses();
                 m_network.Model.ResolveToSingleFlowBranches();
 
             }
-            m_stopwatch.Stop();
-            m_network.PerformanceMetrics.ObservabilityAnalysisExecutionTime = m_stopwatch.ElapsedTicks;
-
         }
 
         /// <summary>
@@ -389,24 +393,16 @@ namespace openLSE
         /// </summary>
         private static void ComputeSystemState()
         {
-            m_stopwatch.Reset();
-            m_stopwatch.Start();
             m_network.ComputeSystemState();
-            m_stopwatch.Stop();
-            m_network.PerformanceMetrics.StateComputationExecutionTime = m_stopwatch.ElapsedTicks;
-
         }
 
         private static void PostProcessSystemState()
         {
             m_network.Model.ComputeEstimatedCurrentFlows();
-
         }
 
         private static void MapOutput(Output output)
         { 
-            m_stopwatch.Reset();
-            m_stopwatch.Start();
             MapVoltageEstimateOutput(output);
             MapCurrentEstimateOutput(output);
             //MapVoltageResidualOutput(output);
@@ -414,11 +410,9 @@ namespace openLSE
             //MapCircuitBreakerStatusOutput(output);
             //MapTopologyProfilingOutput(output);
             MapMeasurementValidationFlagOutput(output);
-            m_stopwatch.Stop();
-            m_totalTimeStopwatch.Stop();
-            m_network.PerformanceMetrics.TotalExecutionTimeInTicks = m_totalTimeStopwatch.ElapsedTicks;
-            m_network.PerformanceMetrics.TotalExecutionTimeInMilliseconds = m_totalTimeStopwatch.ElapsedMilliseconds;
-            m_network.PerformanceMetrics.SolutionRetrievalExecutionTime = m_stopwatch.ElapsedTicks;
+            RuntimeTimer.Stop();
+            m_network.PerformanceMetrics.TotalExecutionTimeInTicks = RuntimeTimer.ElapsedTicks;
+            m_network.PerformanceMetrics.TotalExecutionTimeInMilliseconds = RuntimeTimer.ElapsedMilliseconds;
             MapPerformanceMetrics(output);
         }
 
@@ -458,6 +452,8 @@ namespace openLSE
         {
             Dictionary<string, OutputMeasurement> voltageEstimates = m_network.Model.StateEstimateOutput.ToDictionary(x => x.Key, x => x);
 
+            PerformanceTimer.Reset();
+            PerformanceTimer.Start();
             for (int i = 0; i < output.OutputMeta.VoltageMagnitudeEstimates.Length; i++)
             {
                 string magnitudeKey = output.OutputMeta.VoltageMagnitudeEstimates[i].ID.ToString();
@@ -476,6 +472,8 @@ namespace openLSE
                     output.OutputData.VoltageAngleEstimates[i] = angle.Value;
                 }
             }
+            PerformanceTimer.Stop();
+            m_network.PerformanceMetrics.OutputPreparationExecutionTime += PerformanceTimer.ElapsedTicks;
         }
 
         /// <summary>
@@ -486,6 +484,8 @@ namespace openLSE
         {
             Dictionary<string, OutputMeasurement> currentFlowEstimates = m_network.Model.CurrentFlowEstimateOutput.ToDictionary(x => x.Key, x => x);
 
+            PerformanceTimer.Reset();
+            PerformanceTimer.Start();
             for (int i = 0; i < output.OutputMeta.CurrentFlowMagnitudeEstimates.Length; i++)
             {
                 string magnitudeKey = output.OutputMeta.CurrentFlowMagnitudeEstimates[i].ID.ToString();
@@ -504,6 +504,8 @@ namespace openLSE
                     output.OutputData.CurrentFlowAngleEstimates[i] = angle.Value;
                 }
             }
+            PerformanceTimer.Stop();
+            m_network.PerformanceMetrics.OutputPreparationExecutionTime += PerformanceTimer.ElapsedTicks;
         }
 
         //private static void MapCurrentInjectionEstimateOutput(Output output)
@@ -517,6 +519,8 @@ namespace openLSE
         {
             Dictionary<string, OutputMeasurement> voltageResiduals = m_network.Model.VoltageResidualOutput.ToDictionary(x => x.Key, x => x);
 
+            PerformanceTimer.Reset();
+            PerformanceTimer.Start();
             for (int i = 0; i < output.OutputMeta.VoltageMagnitudeResiduals.Length; i++)
             {
                 string magnitudeKey = output.OutputMeta.VoltageMagnitudeResiduals[i].ID.ToString();
@@ -535,12 +539,16 @@ namespace openLSE
                     output.OutputData.VoltageAngleResiduals[i] = angle.Value;
                 }
             }
+            PerformanceTimer.Stop();
+            m_network.PerformanceMetrics.OutputPreparationExecutionTime += PerformanceTimer.ElapsedTicks;
         }
 
         private static void MapCurrentFlowResidualOutput(Output output)
         {
             Dictionary<string, OutputMeasurement> currentFlowResiduals = m_network.Model.CurrentResidualOutput.ToDictionary(x => x.Key, x => x);
 
+            PerformanceTimer.Reset();
+            PerformanceTimer.Start();
             for (int i = 0; i < output.OutputMeta.CurrentFlowMagnitudeResiduals.Length; i++)
             {
                 string magnitudeKey = output.OutputMeta.CurrentFlowMagnitudeResiduals[i].ID.ToString();
@@ -559,12 +567,16 @@ namespace openLSE
                     output.OutputData.CurrentFlowAngleResiduals[i] = angle.Value;
                 }
             }
+            PerformanceTimer.Stop();
+            m_network.PerformanceMetrics.OutputPreparationExecutionTime += PerformanceTimer.ElapsedTicks;
         }
 
         private static void MapCircuitBreakerStatusOutput(Output output)
         {
             Dictionary<string, OutputMeasurement> circuitBreakerStatuses = m_network.Model.CircuitBreakerStatusOutput.ToDictionary(x => x.Key, x => x);
 
+            PerformanceTimer.Reset();
+            PerformanceTimer.Start();
             for (int i = 0; i < output.OutputMeta.CircuitBreakerStatuses.Length; i++)
             {
                 string key = output.OutputMeta.CircuitBreakerStatuses[i].ID.ToString();
@@ -575,6 +587,8 @@ namespace openLSE
                     output.OutputData.CircuitBreakerStatuses[i] = status.Value;
                 }
             }
+            PerformanceTimer.Stop();
+            m_network.PerformanceMetrics.OutputPreparationExecutionTime += PerformanceTimer.ElapsedTicks;
         }
         
         //private static void MapSwitchStatusOutput(Output output)
@@ -597,6 +611,8 @@ namespace openLSE
         {
             Dictionary<string, OutputMeasurement> topologyProfiling = m_network.Model.TopologyProfilingOutput.ToDictionary(x => x.Key, x => x);
 
+            PerformanceTimer.Reset();
+            PerformanceTimer.Start();
             for (int i = 0; i < output.OutputMeta.TopologyProfilingData.Length; i++)
             {
                 string key = output.OutputMeta.TopologyProfilingData[i].ID.ToString();
@@ -607,6 +623,8 @@ namespace openLSE
                     output.OutputData.TopologyProfilingData[i] = data.Value;
                 }
             }
+            PerformanceTimer.Stop();
+            m_network.PerformanceMetrics.OutputPreparationExecutionTime += PerformanceTimer.ElapsedTicks;
         }
 
         /// <summary>
@@ -615,10 +633,10 @@ namespace openLSE
         /// <param name="output">The output data frame as provided by openECA.</param>
         private static void MapPerformanceMetrics(Output output)
         {
-            output.OutputData.PerformanceMetrics.ActiveVoltagesCount = m_network.Model.ActiveVoltages.Count;
-            output.OutputData.PerformanceMetrics.ActiveCurrentFlowsCount = m_network.Model.ActiveCurrentFlows.Count;
-            output.OutputData.PerformanceMetrics.ActiveCurrentInjectionsCount = m_network.Model.ActiveCurrentInjections.Count;
-            output.OutputData.PerformanceMetrics.ObservedBusCount = m_network.Model.ObservedBuses.Count;
+            output.OutputData.PerformanceMetrics.ActiveVoltagesCount = m_network.PerformanceMetrics.ActiveVoltageCount;
+            output.OutputData.PerformanceMetrics.ActiveCurrentFlowsCount = m_network.PerformanceMetrics.ActiveCurrentFlowCount;
+            output.OutputData.PerformanceMetrics.ActiveCurrentInjectionsCount = m_network.PerformanceMetrics.ActiveCurrentInjectionCount;
+            output.OutputData.PerformanceMetrics.ObservedBusCount = m_network.PerformanceMetrics.ObservedBusCount;
             output.OutputData.PerformanceMetrics.RefreshTime = m_network.PerformanceMetrics.RefreshExecutionTime;
             output.OutputData.PerformanceMetrics.ParsingTime = m_network.PerformanceMetrics.ParsingExecutionTime;
             output.OutputData.PerformanceMetrics.MeasurementMappingTime = m_network.PerformanceMetrics.MeasurementMappingExecutionTime;

@@ -19,6 +19,8 @@
         <ComponentGroupRef Id="GSFDependencyComponents" />
         <ComponentGroupRef Id="ECADependencyComponents" />
         <ComponentGroupRef Id="ModelComponents" />
+        <ComponentGroupRef Id="x64Providers" />
+        <ComponentGroupRef Id="x86Providers" />
       </Feature>
 
       <Feature Id="OfflineModelingTools" Title="Modeling and Analysis Tool">
@@ -27,6 +29,8 @@
         <ComponentGroupRef Id="GSFDependencyComponents" />
         <ComponentGroupRef Id="ECADependencyComponents" />
         <ComponentGroupRef Id="ModelComponents" />
+        <ComponentGroupRef Id="x64Providers" />
+        <ComponentGroupRef Id="x86Providers" />
       </Feature>
     </Feature>
 
@@ -57,6 +61,8 @@
         <Directory Id="ManufacturerFolder" Name="!(bind.property.Manufacturer)">
           <Directory Id="INSTALLFOLDER" Name="openLSE">
             <Directory Id="MODELFOLDER" Name="Model" />
+            <Directory Id="x64PROVIDERFOLDER" Name="x64" />
+            <Directory Id="x86PROVIDERFOLDER" Name="x86" />
           </Directory>
         </Directory>
       </Directory>
@@ -82,9 +88,26 @@
       <Component Id="MathNet.Numerics">
         <File Id="MathNet.Numerics.dll" Name="MathNet.Numerics.dll" Source="$(var.SolutionDir)\Dependencies\LSE\MathNet.Numerics.dll" />
       </Component>
-
     </ComponentGroup>
 
+    <ComponentGroup Id="x64Providers" Directory="x64PROVIDERFOLDER">
+      <Component Id="x64_libiomp5md">
+        <File Id="x64_libiomp5md.dll" Name="libiomp5md.dll" Source="$(var.SolutionDir)\Dependencies\LSE\x64\libiomp5md.dll" />
+      </Component>
+      <Component Id="x64_MathNet.Numerics.MKL">
+        <File Id="x64_MathNet.Numerics.MKL.dll" Name="MathNet.Numerics.MKL.dll" Source="$(var.SolutionDir)\Dependencies\LSE\x64\MathNet.Numerics.MKL.dll" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="x86Providers" Directory="x86PROVIDERFOLDER">
+      <Component Id="x86_libiomp5md">
+        <File Id="x86_libiomp5md.dll" Name="libiomp5md.dll" Source="$(var.SolutionDir)\Dependencies\LSE\x86\libiomp5md.dll" />
+      </Component>
+      <Component Id="x86_MathNet.Numerics.MKL">
+        <File Id="x86_MathNet.Numerics.MKL.dll" Name="MathNet.Numerics.MKL.dll" Source="$(var.SolutionDir)\Dependencies\LSE\x86\MathNet.Numerics.MKL.dll" />
+      </Component>
+    </ComponentGroup>
+    
     <ComponentGroup Id="NetworkModelEditorComponents" Directory="INSTALLFOLDER">
       <!-- Network Model Editor Dependencies -->
       <Component Id="NetworkModelEditor">
