@@ -26,10 +26,24 @@ namespace openLSE
         private static int m_frameIndex;
         private static Stopwatch m_stopwatch;
         private static Stopwatch m_totalTimeStopwatch;
+        private static bool m_networkChangeDetected;
 
         #endregion
 
         #region [ Properties ] 
+
+        public static bool NetworkChangeDetected
+        {
+            get
+            {
+                return m_networkChangeDetected;
+            }
+            set
+            {
+                m_networkChangeDetected = value;
+            }
+        }
+
 
         /// <summary>
         /// The hook back into the openECA API
@@ -376,12 +390,10 @@ namespace openLSE
             m_network.RunNetworkReconstructionCheck();
             if (m_network.HasChangedSincePreviousFrame || m_network.Model.ObservedBuses.Count == 0)
             {
+                NetworkChangeDetected = true;
+                MainWindow.WriteMessage("Network changed detected. Beginning network reconstruction...");
                 m_network.Model.DetermineActiveCurrentFlows();
                 m_network.Model.DetermineActiveCurrentInjections();
-            }
-
-            if (m_network.HasChangedSincePreviousFrame || m_network.Model.ObservedBuses.Count == 0)
-            {
                 m_network.Model.ResolveToObservedBuses();
                 m_network.Model.ResolveToSingleFlowBranches();
 
@@ -394,6 +406,11 @@ namespace openLSE
         private static void ComputeSystemState()
         {
             m_network.ComputeSystemState();
+            if (NetworkChangeDetected)
+            {
+                NetworkChangeDetected = false;
+                MainWindow.WriteMessage("Network reconstruction complete. Pseudo-inverse cached.");
+            }
         }
 
         private static void PostProcessSystemState()
