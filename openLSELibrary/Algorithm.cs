@@ -4,6 +4,7 @@ using System.Linq;
 using System.Diagnostics;
 using SynchrophasorAnalytics.Networks;
 using SynchrophasorAnalytics.Measurements;
+using SynchrophasorAnalytics.Modeling;
 using GSF.Configuration;
 using GSF.IO;
 using ECAClientFramework;
@@ -182,7 +183,7 @@ namespace openLSE
             SystemSettings.ConnectionString = @"server=localhost:6190; interface=0.0.0.0";
             SystemSettings.FramesPerSecond = 30;
             SystemSettings.LagTime = 3;
-            SystemSettings.LeadTime = 1;
+            SystemSettings.LeadTime = 3;
         }
 
         #endregion
@@ -424,7 +425,7 @@ namespace openLSE
             MapCurrentEstimateOutput(output);
             //MapVoltageResidualOutput(output);
             //MapCurrentFlowResidualOutput(output);
-            //MapCircuitBreakerStatusOutput(output);
+            MapCircuitBreakerStatusOutput(output);
             //MapTopologyProfilingOutput(output);
             MapMeasurementValidationFlagOutput(output);
             RuntimeTimer.Stop();
@@ -447,7 +448,14 @@ namespace openLSE
         /// <param name="output">The output data frame as provided by openECA.</param>
         private static void MapMeasurementValidationFlagOutput(Output output)
         {
-            Dictionary<string, OutputMeasurement> validationFlags = m_network.Model.MeasurementValidationFlagOutput.ToDictionary(x => x.Key, x => x);
+            Dictionary<string, OutputMeasurement> validationFlags = new Dictionary<string, OutputMeasurement>();
+            foreach (OutputMeasurement measurement in m_network.Model.MeasurementValidationFlagOutput)
+            {
+                if (!validationFlags.ContainsKey(measurement.Key))
+                {
+                    validationFlags.Add(measurement.Key, measurement);
+                }
+            }
 
             for (int i = 0; i < output.OutputMeta.MeasurementValidationFlags.Length; i++)
             {
@@ -590,7 +598,14 @@ namespace openLSE
 
         private static void MapCircuitBreakerStatusOutput(Output output)
         {
-            Dictionary<string, OutputMeasurement> circuitBreakerStatuses = m_network.Model.CircuitBreakerStatusOutput.ToDictionary(x => x.Key, x => x);
+            Dictionary<string, OutputMeasurement> circuitBreakerStatuses = new Dictionary<string, OutputMeasurement>();
+            foreach (OutputMeasurement measurement in m_network.Model.CircuitBreakerStatusOutput)
+            {
+                if (!circuitBreakerStatuses.ContainsKey(measurement.Key))
+                {
+                    circuitBreakerStatuses.Add(measurement.Key, measurement);
+                }
+            }
 
             PerformanceTimer.Reset();
             PerformanceTimer.Start();
